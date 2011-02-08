@@ -1,120 +1,91 @@
 var Twilio = require('twilio').Client,
-    Twiml = require('/home/mat/node-twilio').Twiml,
-    Twitter = require('/home/mat/evented-twitter/lib/evented-twitter'),
+    Twiml = require('../node-twilio').Twiml,
     OAuth = require('oauth').OAuth,
     http = require('http'),
     files = require('fs'),
     sys = require('sys');
+    
+var conf = JSON.parse(files.readFileSync(__dirname + '/config.json')),
+    twil = new Twilio(conf.twilio.accSID, conf.twilio.token, conf.hostURL),
+    phone = twil.getPhoneNumber(conf.twilio.inTel),
+    auth = new OAuth(conf.twitter.reqURL, conf.twitter.accURL, 
+        conf.twitter.conKey, conf.twitter.conSec, "1.0A", null, "HMAC-SHA1");    
+    debug = true,
+    agents = {};
 
-var conf = JSON.parse(files.readFileSync(__dirname + '/config.json'));
-var oauth = conf.oauth;
-delete conf.oauth;
-oauth.auth = 'oauth';
-var twil = new Twilio(conf.twilSid, conf.twilTok, conf.hostUri);
-var twit = new Twitter.TwitterStream(conf);
-var phone = twil.getPhoneNumber(conf.source);
-var auth = new OAuth(oauth.requestTokenURL, oauth.accessTokenURL, 
-    oauth.consumerKey, oauth.consumerSecret, "1.0A", null, "HMAC-SHA1");    
+var filter = new Filter({ host:'stream.twitter.com', path:'/1/statuses/filter.json'
+    , head: { 'Connection': 'Keep-Alive' },user: conf.twitter.username , pass: conf.twitter.password});
 
-agent = new Agent({name:'Magic Mat', phone:conf.matTel, token:oauth.accessToken, secret:oauth.accessTokenSecret, usrId:conf.twitUsr} );
+conf.agents.forEach(function(creds) { 
+    new Agent(creds).watch();
+});
 
 function Agent(props) { 
-    
-    for (key in {token:'', secret:'', phone:'', name:'', usrId:''}) {
-        if (props[key]) this[key] = props[key];
+    var my = this;
+    ['accTok', 'accSec', 'telNo', 'name', 'twitID'].forEach(function(key) {
+        if (props[key]) my[key] = props[key];
         else throw new Error('Missing Required Property : '+ key);
-    }
-    this.stream = {};
+    });
+    my.track = my.twitID;
+    if (props.track) my.track += ' '+ props.track;
     
-    this.watch = function(track, callBack) { 
-        stream = twit.filter('json', {'track':'"'+this.usrId+'"' });
-        if (track) stream = twit.filter('json', {'track':this.usrId +','+ track});
-        start(stream, callBack);
+    this.watch = function(track) {
+        if (track) my.track +=' '+ track;
+        bug(my.track, 'watching '+my.telNo);
+        filter.start(my.track, my.alert);
     }
     
     this.alert = function(tweet) {
-        call(this.phone, this.name, tweet, this.post); 
+        bug(tweet.text, 'calling '+my.telNo);
+        call(my.telNo, my.name, tweet, my.post);
     }
     
-    this.post = function(status, callBack) {
-        if ((typeof status == object) && (status.user.screen_name != this.usrId)) this.post(status.text, callBack);
-        else auth.post("http://api.twitter.com/1/statuses/update.json", this.token, this.secret, {"status":status}, callBack);          
+    this.post = function(status) {
+        bug(status, 'post status');
+        if ((typeof status == 'object') && (status.user.screen_name != my.twitID)) my.post(status.text);
+        else auth.post('http://api.twitter.com/1/statuses/update.json', my.accTok, my.accSec, {'status':status});          
     }
 
     this.pause = function() { 
-        try { this.stream.close();
-        } catch(e) {};
+        bug(my.telNo, 'pause watching');
+        filter.stop(my.track);
     }
-    
-    //this.watch(props.track, this.alert);
-    //this.watch('sublime', this.alert);
-    this.alert({text:'yo gabba gabba', user:{name:'The Jolly Green Giant', screen_name:''}});
 }
 
-function start(stream, callBack) { 
-    
-    stream.on('ready', function() {
-        stream.on('tweet', function(tweet) {
-            if(!String(tweet).trim()) return;
-            try {
-                tweet = JSON.parse(tweet);
-                sys.log(sys.inspect(tweet));
-                callBack(tweet);
-            } catch(e) {
-                sys.debug(sys.inspect(e));
-            }
-            stream.close();
-        });
-    });
-    
-    stream.on('complete', function(response) {
-        stream.close();
-    });
-    
-    stream.on('error', function(err) {
-        sys.debug('got here');
-        sys.debug(err.message);
-    });
-    
-    stream.start();
-}
-
+// initalise the twilio call Handler. If tweet is defined then an call will be made.
 function call(telNo, name, tweet, callBack) { 
     phone.setup(function() {
-        
-        sys.log('Calling '+ telNo);
-        sys.log(sys.inspect(tweet));
-        
         var record = new Twiml.Record({transcribe:true, timeout:10, maxLength:120, finishOnKey:'1234567890*#'}); 
         
         var greet = function(reqParams, res) {
-            res.append(new Twiml.Say('Hey '+ name +' you rock - welcome to the phoneGate twitter Phone gateway.'));
+            res.append(new Twiml.Say('Hey '+ name +' '+conf.prompts.welcome));
             if (tweet) { 
-                res.append(new Twiml.Say('We have found a new message on Twitter for you from '+tweet.user.name));
+                res.append(new Twiml.Say('You have a new message on Twitter from '+tweet.user.name));
                 res.append(new Twiml.Pause(2));
                 res.append(new Twiml.Say(clean(tweet.text)));
-                res.append(new Twiml.Say('If you would like respond then '));
+                res.append(new Twiml.Say('If you would like to respond then '));
             }
-            res.append(new Twiml.Say('Please leave a message. This will be converted to text and posted to phoneGates twitter account. We will call you back if there are any replies. Press any key to hangup'));
+            res.append(new Twiml.Say(conf.prompts.record));
             res.append(record);
             res.send();
         }
         
         record.on('recorded', function(reqParams, res) {
-            res.append(new Twiml.Say('Thanks Buddy - we\'ll be in touch - This service brought to you by Mat Taylor inc'));
+            res.append(new Twiml.Say(conf.prompts.goodbye));
             res.append(new Twiml.Hangup());
             res.send();
         });
         
         record.on('transcribed', function(reqParams, res) { 
             var msgTxt = reqParams.TranscriptionText;
-            if (tweet) msgTxt = '@'+tweet.user.screen_name + msgTxt;
-            short(reqParams.RecordingUrl, function(uri) { callBack(msgTxt +' '+ uri) });
-            sys.log(sys.inspect(reqParams));
+            if (tweet) msgTxt = '@'+tweet.user.screen_name +' '+ msgTxt;
+            short(reqParams.RecordingUrl, function(uri) { 
+                callBack(msgTxt +' '+ uri);
+            });
         });
-        
+
         if (tweet) phone.makeCall(telNo, null,  function(call) {
-               call.on('answered', greet);    
+            call.on('answered', greet);    
         });
         
         phone.on('incomingCall', greet);
@@ -126,24 +97,84 @@ function clean(text) {
     return text.replace(/http\S+/, '').replace(/@\S+/,'').replace(/#\S+/,'');
 }
 
-// URL shortening service invocation using Google
+// URL shortening service invocation using Google. CallBack should handle the shorted URL
 function short(url, callBack) { 
-    var client = http.createClient(443, 'www.googleapis.com', secure=true);
-    var request= client.request('POST','/urlshortener/v1/url?key='+conf.googKey, { 'Host':'www.googleapis.com', 'Content-Type':'application/json'});
-    request.write('{ "longUrl":"'+url+'"}', encoding='utf8');
-    request.end();
-    request.on('response', function (response) {
-        response.setEncoding('utf8');
-        response.on('data', function (body) { callBack(JSON.parse(body).id); });
-    });
+    getJSON({ host: 'www.googleapis.com', path: '/urlshortener/v1/url?key='+conf.googKey
+        , port: 443, head: {'Content-Type':'application/json'}, post: '{"longUrl":"'+url+'"}'
+        }, function(res) { callBack(res.id) }
+    );
 }
 
-var dump = function(err, data, res) {
-    try { 
-        if (data) sys.puts(sys.inspect(JSON.parse(data)));
-    } catch (e) {
-        sys.puts(e);
+function Filter(opts) { 
+    var my = this;
+    my.tracks = {};
+    
+    this.start = function(track, callBack) { 
+        if (track) my.tracks[track] = callBack;
+        if (my.request) my.request.close;
+        opts.post = 'track='+Object.keys(my.tracks);
+        bug(opts.post, 'tracking');
+        my.request = getJSON(opts, my.route);
     }
-    if (err) sys.puts(sys.inspect(err));
-    if (res) sys.puts(sys.inspect(res));
-}    
+    
+    this.stop = function(track) {
+        delete my.tracks[track];
+        this.start();
+    }
+    
+    this.route = function(tweet) {
+        bug(tweet.text, 'routing tweet');
+        for (track in my.tracks) {
+            try { 
+                if (tweet.text.match(new RegExp(track.replace(/\s+/, '\.\*')))) my.tracks[track](tweet);
+            } catch(e) {
+                bug(e, 'routing error');
+            }
+        }
+    }
+    
+    this.close = function() { 
+        if (my.request) my.request.close();
+    }
+}
+
+//posts to host, callsBacks json objects
+function getJSON(req, callBack) { 
+    ['host', 'path'].forEach(function(key) {
+        if (!req[key]) throw new Error('Missing Required Property : '+ key);
+    });
+    var client, request;
+    if (req.port) client = http.createClient(req.port, req.host, req.port=443);
+    else client = http.createClient(80, req.host);
+    if (!req.head) req.head ={};
+    if (req.user) req.head['Authorization'] = 'Basic ' + new Buffer(req.user + ':' + req.pass).toString('base64');
+    req.head['Host'] = req.host;
+    
+    if (req.post) { 
+        if (!req.head['Content-Type']) req.head['Content-Type']  = 'application/x-www-form-urlencoded';
+        request= client.request('POST', req.path, req.head);
+        request.write(req.post, encoding='utf8');
+    } else request= client.request('GET', req.path, req.head);
+    request.end();
+    
+    if (callBack) request.on('response', function (response) {
+        response.setEncoding('utf8');
+        response.on('data', function (chunk) { 
+            try {
+                if(String(chunk).trim()) callBack(JSON.parse(chunk)); 
+            } catch(e) {
+                bug(chunk, 'json error');
+            }
+        });
+    });
+    return request;
+}
+
+function bug(data, label) {
+    if (!label) label=' ';
+    if (debug) try {
+        sys.debug(label +': '+sys.inspect(data));
+    } catch(e) {
+        bug(e);
+    }
+}
