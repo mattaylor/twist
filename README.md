@@ -1,5 +1,5 @@
 
-= Intro 
+## Intro 
 
 'Twist.js' is a node application that implements a multi-user 2 way phone gateway to twitter
 
@@ -9,25 +9,26 @@ Twist creates a number of user agents, each of which will watch twitter for twee
 The user will also be prompted to record a reply to this message which will be transcribed to text and post as a direct message to the origaal poster.
 This tweet will be accompanied by a link to the recorded message.
 
-# Install  
+## Install  
 
-1. install node and npm [http://node.js]
-2. install express and outh packages
-> npm install express
-> npm install OAuth
-3. npm install 'express'
-5. Get the code..
-> git clone git@github.com:mattaylor/node-twilio.git
-> git clone git@github.com:mattaylor/twist.git
+Install node and npm (2.6) http://nodejs.org
 
-# Configure 
+Install express and outh packages for node..
+
+    npm install express
+    npm install OAuth
+
+Get the code..
+
+    git clone git@github.com:mattaylor/node-twilio.git
+    git clone git@github.com:mattaylor/twist.git
+
+## Configure 
 
 To configure twist you will need to copy 
-> cd twist
-> cp config-sample.json config.json
 
-* Your host name
-* Google App Key (if you have one)
+    cd twist
+    cp config-sample.json config.json
 
 ### Prompts
 
@@ -60,20 +61,28 @@ For each user you would like to track you will also need:
 Note: Only Tweets which contain mentions of this user AND the keywords listed will be tracked
 
 To Track global keywords the 'agent.track' property should be prefixed by a ',' eg.. 
-> agent.track:',Egypt'  // will track all tweets mentioning the agents name OR 'Egypt'
-> agent.track: 'Egypt'   // will track all tweets menitioned the agents twitter name AND 'Egypt'
 
-# Usage
+    agent.track:',Egypt'  // will track all tweets mentioning the agents name OR 'Egypt'
+    agent.track: 'Egypt'   // will track all tweets menitioned the agents twitter name AND 'Egypt'
 
-> require('app.js');
-> conf.agents.forEach(function(creds) { 
->    new Agent(creds).watch();
-> });
+## Usage
+
+    require('app.js');
+    conf.agents.forEach(function(creds) { 
+        new Agent(creds).watch();
+    });
 
 
-# API
+### API
 
-> Agent.watch(keywords)
-> Agent.alert  // Call with 
-> Agent.post   // send a Message to Twitter
-> Agent.pause  // Stop the agent
+    new Agent({name:'', tel // Create a new Agent
+    Agent.watch(keywords)   // Watch Twitter streams for menitons which include 'keywords'
+    Agent.alert(tweet)      // Make call which plays back 'tweet'
+    Agent.post(tweet)       // send a Message to Twitter
+    Agent.pause             // Stop the agent
+
+## TODO
+
+1. Add HTTP server for on demand Oauth Access token provisioning
+2. Add Paypal Micropayments support for provisoning.
+3. Save config and agents to mongo / persevere
