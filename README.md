@@ -9,22 +9,18 @@ Twist creates a number of user agents, each of which will watch twitter for twee
 The user will also be prompted to record a reply to this message which will be transcribed to text and post as a direct message to the origaal poster.
 This tweet will be accompanied by a link to the recorded message.
 
-= Install  
+# Install  
 
 1. install node and npm [http://node.js]
-
 2. install express and outh packages
-
 > npm install express
 > npm install OAuth
-
 3. npm install 'express'
-
 5. Get the code..
 > git clone git@github.com:mattaylor/node-twilio.git
 > git clone git@github.com:mattaylor/twist.git
 
-= Config 
+# Configure 
 
 To configure twist you will need to copy 
 > cd twist
@@ -33,7 +29,13 @@ To configure twist you will need to copy
 * Your host name
 * Google App Key (if you have one)
 
-== Twilio ==
+### Prompts
+
+* 'record'
+* 'welcome'
+* 'goodbye'
+
+### Twilio
 
 To use Twist you need a valid Twilio account with an application and inbound number..
 
@@ -41,13 +43,12 @@ To use Twist you need a valid Twilio account with an application and inbound num
 * accessToken
 * Inbound Number
 
-== Twitter ==
-
+### Twitter 
 
 * Twitter App ID
 * Master Twitter Account and Password
 
-== Agents ==
+### Agents
 
 For each user you would like to track you will also need:
 
@@ -60,5 +61,19 @@ Note: Only Tweets which contain mentions of this user AND the keywords listed wi
 
 To Track global keywords the 'agent.track' property should be prefixed by a ',' eg.. 
 > agent.track:',Egypt'  // will track all tweets mentioning the agents name OR 'Egypt'
-> agent.track:'Egypt'   // will track all tweets menitioned the agents twitter name AND 'Egypt'
+> agent.track: 'Egypt'   // will track all tweets menitioned the agents twitter name AND 'Egypt'
 
+# Usage
+
+> require('app.js');
+> conf.agents.forEach(function(creds) { 
+>    new Agent(creds).watch();
+> });
+
+
+# API
+
+> Agent.watch(keywords)
+> Agent.alert  // Call with 
+> Agent.post   // send a Message to Twitter
+> Agent.pause  // Stop the agent

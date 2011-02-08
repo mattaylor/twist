@@ -27,12 +27,14 @@
 	    ,   "accTok":   "ACCESS TOKEN TO POST TO THIS TWITTER ACCOUNT"
         ,   "accSec":   "ACCESS TOKEN SECRET FOR TWITTER POSTS"
 	    ,   "track" :   "KEYWORDS TO TRACK"
+        ,   "credit":   "Number of calls"
 	    }
     ,   {   "name"  :   "John Doe"
 	    ,   "telNo" :   "+1234567890" 
 	    ,   "twitID":   "xxxxxxxx"
 	    ,   "accTok":   "xxxxxxxxx-sHFUTlIWqD8eA3JXquOSNnKDWqC3iItWzdXIffhl"
         ,   "accSec":   "xxxxxxxxxiZK4uYIslgsBB6f15YnCxN4LlKNbGVRTUQ"
+        ,   "credit":   100
         }
     ]
 }

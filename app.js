@@ -33,7 +33,7 @@ conf.agents.forEach(function(creds) {
 
 function Agent(props) { 
     var my = this;
-    ['accTok', 'accSec', 'telNo', 'name', 'twitID'].forEach(function(key) {
+    ['accTok', 'accSec', 'telNo', 'name', 'twitID', 'credit'].forEach(function(key) {
         if (props[key]) my[key] = props[key];
         else throw new Error('Missing Required Property : '+ key);
     });
@@ -47,8 +47,10 @@ function Agent(props) {
     }
     
     this.alert = function(tweet) {
+        if (my.credit < 1) throw new Error('No Credit '+my.telNo);
         bug(tweet.text, 'calling '+my.telNo);
         call(my.telNo, my.name, tweet, my.post);
+        my.credit -= 1;
     }
     
     this.post = function(status) {
@@ -74,7 +76,7 @@ function call(telNo, name, tweet, callBack) {
                 res.append(new Twiml.Say('You have a new message on Twitter from '+tweet.user.name));
                 res.append(new Twiml.Pause(2));
                 res.append(new Twiml.Say(clean(tweet.text)));
-                res.append(new Twiml.Say('If you would like to respond then '));
+                res.append(new Twiml.Say('If you would like to reply then '));
             }
             res.append(new Twiml.Say(conf.prompts.record));
             res.append(record);
@@ -134,12 +136,11 @@ function Filter(opts) {
     }
     
     this.route = function(tweet) {
-        bug(tweet.text, 'routing tweet');
         for (track in my.tracks) {
             try { 
                 if (tweet.text.match(new RegExp(track.replace(/\s+/, '\.\*')))) my.tracks[track](tweet);
             } catch(e) {
-                bug(e, 'routing error');
+                bug(e, 'Unable to Route '+ tweet.text);
             }
         }
     }
