@@ -1,21 +1,32 @@
+/*!
+ * twist/app.js is An implmentation of a multi user 2 way twitter phone gateway
+ *
+ * Copyright(c) 2011 Mat Taylor.
+ * MIT Licensed
+ *
+ * @author mattaylor
+ */
+
+/* Module dependencies */
 var Twilio = require('twilio').Client,
     Twiml = require('../node-twilio').Twiml,
     OAuth = require('oauth').OAuth,
     http = require('http'),
     files = require('fs'),
     sys = require('sys');
-    
+
+/* Globals */    
 var conf = JSON.parse(files.readFileSync(__dirname + '/config.json')),
     twil = new Twilio(conf.twilio.accSID, conf.twilio.token, conf.hostURL),
     phone = twil.getPhoneNumber(conf.twilio.inTel),
     auth = new OAuth(conf.twitter.reqURL, conf.twitter.accURL, 
         conf.twitter.conKey, conf.twitter.conSec, "1.0A", null, "HMAC-SHA1");    
     debug = true,
+    filter = new Filter({ host:'stream.twitter.com', path:'/1/statuses/filter.json'
+        , head: { 'Connection': 'Keep-Alive' },user: conf.twitter.username , pass: conf.twitter.password}),
     agents = {};
 
-var filter = new Filter({ host:'stream.twitter.com', path:'/1/statuses/filter.json'
-    , head: { 'Connection': 'Keep-Alive' },user: conf.twitter.username , pass: conf.twitter.password});
-
+/* Initiatise Agents */
 conf.agents.forEach(function(creds) { 
     new Agent(creds).watch();
 });
