@@ -1,6 +1,4 @@
 
-## Intro 
-
 'Twist.js' is a node application that implements a multi-user 2 way phone gateway to twitter
 
 Twist was inspired by the issues faced recently by Egypt when internet access to the enture country goes 'offline'
@@ -11,32 +9,38 @@ This tweet will be accompanied by a link to the recorded message.
 
 ## Install  
 
-Install node and npm (2.6) http://nodejs.org
+Install node (2.6) http://nodejs.org
+
+    $ cd node
+    $ ./configure
+    $ make install 
+
+Install npm 
+
+    $ curl http://npmjs.org/install.sh | sudo sh
 
 Install express and outh packages for node..
 
-    npm install express
-    npm install OAuth
+    $ npm install express
+    $ npm install OAuth
 
 Get the code..
 
-    git clone git@github.com:mattaylor/node-twilio.git
-    git clone git@github.com:mattaylor/twist.git
+    $ git clone git@github.com:mattaylor/node-twilio.git
+    $ git clone git@github.com:mattaylor/twist.git
 
-## Configure 
+## Global Config 
 
 To configure twist you will need to copy 
 
-    cd twist
-    cp config-sample.json config.json
+    $ cd twist
+    $ cp config-sample.json config.json
 
-### Prompts
+To update the prompts
 
 * 'record'
 * 'welcome'
 * 'goodbye'
-
-### Twilio
 
 To use Twist you need a valid Twilio account with an application and inbound number..
 
@@ -44,12 +48,12 @@ To use Twist you need a valid Twilio account with an application and inbound num
 * accessToken
 * Inbound Number
 
-### Twitter 
+You must also create a Twilio App
 
 * Twitter App ID
 * Master Twitter Account and Password
 
-### Agents
+## Twist Agents
 
 For each user you would like to track you will also need:
 
@@ -67,22 +71,30 @@ To Track global keywords the 'agent.track' property should be prefixed by a ',' 
 
 ## Usage
 
-    require('app.js');
-    conf.agents.forEach(function(creds) { 
-        new Agent(creds).watch();
+Create a new file 'app.js' with the following..
+
+    var agents = require('./twist').create();
+    agents.forEach(function(agent) { 
+        agent.scan();
     });
 
+Then let node do it's thing..
+    
+    $ node app.js
 
-### API
+## API
 
-    new Agent({name:'', tel // Create a new Agent
-    Agent.watch(keywords)   // Watch Twitter streams for menitons which include 'keywords'
-    Agent.alert(tweet)      // Make call which plays back 'tweet'
+    create()                // Return an array of agents initialised from the config file
+    Agent.scan(keywords)    // Watch Twitter streams for menitons which include 'keywords'
+    Agent.call(tweet)       // Make call which plays back 'tweet'
     Agent.post(tweet)       // send a Message to Twitter
-    Agent.pause             // Stop the agent
+    Agent.stop()            // Stop the agent
 
 ## TODO
 
 1. Add HTTP server for on demand Oauth Access token provisioning
 2. Add Paypal Micropayments support for provisoning.
 3. Save config and agents to mongo / persevere
+
+Web app should use perstore model for 
+

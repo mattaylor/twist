@@ -1,38 +1,38 @@
-{   "hostURL":      "YOUR APP HOST"
-,   "googKey":      "GOOGLE APP KEY (optional)"
-,   "twilio" : 
+{   "hostURL":  "YOUR APP HOST"
+,   "googKey":  "GOOGLE APP KEY (optional)"
+,   "twilio"    : 
     {   "accSID":   "YOUR TWILIO ACCOUNT SID"
     ,   "token" :   "YOUR TWILIO APP TOKEN"
-	,   "inTel" :   "YOUR TWILIO INBOUND NUMBER"
+    ,   "inTel" :   "YOUR TWILIO INBOUND NUMBER"
     }
-,   "twitter":    
+,   "twitter"   :    
     {   "username": "YOUR TWITTER ACCOUT - FOR STREAMING"
 	,   "password": "YOUR TWITTER PASSWORD - FOR STREAMING"
 	,   "appName" : "YOUR TWITTER APP NAME"
 	,   "conKey"  : "YOUR TWITTER APP CONSUMER KEY" 
 	,   "conSec"  : "YOUR TWITTER APP CONSUMER SECRET"
-	,   "reqURL"  : "http://api.twitter.com/oauth/request_token"
+    ,   "reqURL"  : "http://api.twitter.com/oauth/request_token"
     ,   "accURL"  : "http://api.twitter.com/oauth/access_token"
     ,   "authURL" : "https://api.twitter.com/oauth/authorize"
 	}
-,   "prompts" : 
+,   "prompts"   : 
     {   "welcome":  "Welcome to phoneGate"
     ,   "record" :  "Please leave a message. This will be converted to text and posted to Twitter. We will call you back if there are replies. Press any key to hangup"
     ,   "goodbye":  "This Service is brought to you by Vizivi.net, Goodbye"
 	}
-,   "agents" : 
+,   "agents"    : 
     [   {   "name"  :   "NAME OF PERSON TO TRACK"
-	    ,   "telNo" :   "NUMBER OF PERSON TO TRACK"
+        ,   "telNo" :   "NUMBER OF PERSON TO TRACK"
         ,   "twitID":   "TWITTER ACCOUNT TO POST TRANSCRIPTIONS TO"
-	    ,   "accTok":   "ACCESS TOKEN TO POST TO THIS TWITTER ACCOUNT"
+        ,   "accTok":   "ACCESS TOKEN TO POST TO THIS TWITTER ACCOUNT"
         ,   "accSec":   "ACCESS TOKEN SECRET FOR TWITTER POSTS"
-	    ,   "track" :   "KEYWORDS TO TRACK"
+        ,   "track" :   "KEYWORDS TO TRACK"
         ,   "credit":   "Number of calls"
-	    }
+        }
     ,   {   "name"  :   "John Doe"
 	    ,   "telNo" :   "+1234567890" 
 	    ,   "twitID":   "xxxxxxxx"
-	    ,   "accTok":   "xxxxxxxxx-sHFUTlIWqD8eA3JXquOSNnKDWqC3iItWzdXIffhl"
+        ,   "accTok":   "xxxxxxxxx-sHFUTlIWqD8eA3JXquOSNnKDWqC3iItWzdXIffhl"
         ,   "accSec":   "xxxxxxxxxiZK4uYIslgsBB6f15YnCxN4LlKNbGVRTUQ"
         ,   "credit":   100
         }
