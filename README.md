@@ -42,16 +42,20 @@ The following properites determine the voice to text prompts that are used when 
 * 'welcome'
 * 'goodbye'
 
-To use Twist you need a valid Twilio account with an application and inbound number. These can be obtained by working throught the registration process as .
+To use Twist you need a valid Twilio account with an application and inbound number. These can be obtained by working throught the registration process from  https://www.twilio.com/try-twilio
+
+You will need to also make your app live, and purchase a valid inbound number. The following config properties should then be updated as appropriate.
 
 * accountSID
 * accessToken
 * Inbound Number
 
-You must also create a Twilio App
+You will also need to create a Twitter app from http://dev.twitter.com/ and update the following credentials as appropriate
 
 * Twitter App ID
-* Master Twitter Account and Password
+* Master Twitter Account and Password - used for the streaming api.
+* Consumer Key and Secret
+
 
 ## Twist Agents
 
@@ -61,6 +65,7 @@ For each user you would like to track you will also need:
 * Access token and secret to post to this account.
 * Phone number for this user agent.
 * Keywords to be tracked for this agent
+* Credit limits to control the number of calls permissible to this agent.
 
 Tane Piper has wrtten a usefull script for obtaining Twitter access tokens and secrets using Twitters OOB Oauth flow. Details can be found on his blog (http://blog.tanepiper.com/a-little-nodejs-twitter-oauth-script) and the the gist is availbale on https://gist.github.com/575303
 
@@ -97,6 +102,4 @@ Then let node do it's thing..
 1. Add HTTP server for on demand Oauth Access token provisioning
 2. Add Paypal Micropayments support for provisoning.
 3. Save config and agents to mongo / persevere
-
-Web app should use perstore model for 
 
