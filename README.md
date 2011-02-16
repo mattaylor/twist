@@ -31,18 +31,18 @@ Get the code..
 
 ## Global Config 
 
-To configure twist you will need to copy 
+To configure twist you will need to copy the sample config to 'config.json' and update it with values appropriate to your application.
 
     $ cd twist
     $ cp config-sample.json config.json
 
-To update the prompts
+The following properites determine the voice to text prompts that are used when an inbound or outbound  call is initiated.
 
 * 'record'
 * 'welcome'
 * 'goodbye'
 
-To use Twist you need a valid Twilio account with an application and inbound number..
+To use Twist you need a valid Twilio account with an application and inbound number. These can be obtained by working throught the registration process as .
 
 * accountSID
 * accessToken
@@ -61,6 +61,8 @@ For each user you would like to track you will also need:
 * Access token and secret to post to this account.
 * Phone number for this user agent.
 * Keywords to be tracked for this agent
+
+Tane Piper has wrtten a usefull script for obtaining Twitter access tokens and secrets using Twitters OOB Oauth flow. Details can be found on his blog (http://blog.tanepiper.com/a-little-nodejs-twitter-oauth-script) and the the gist is availbale on https://gist.github.com/575303
 
 Note: Only Tweets which contain mentions of this user AND the keywords listed will be tracked
 
@@ -84,7 +86,7 @@ Then let node do it's thing..
 
 ## API
 
-    create()                // Return an array of agents initialised from the config file
+    init()                // Return an array of agents initialised from the config file
     Agent.scan(keywords)    // Watch Twitter streams for menitons which include 'keywords'
     Agent.call(tweet)       // Make call which plays back 'tweet'
     Agent.post(tweet)       // send a Message to Twitter
